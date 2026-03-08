@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Happy When Project — Dinesh Kumar</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e0f;
+    --surface: #161618;
+    --surface2: #1e1e21;
+    --border: #2a2a2e;
+    --gold: #c8a96e;
+    --gold-dim: #8a7148;
+    --gold-glow: rgba(200,169,110,0.12);
+    --text: #f0ece4;
+    --text-muted: #7a7670;
+    --text-mid: #b0aa9e;
+    --teal: #5ba8a0;
+    --teal-dim: rgba(91,168,160,0.1);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Outfit', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.4;
+  }
+
+  /* ── AMBIENT LIGHTS ── */
+  .ambient {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(120px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .ambient-1 {
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(200,169,110,0.07) 0%, transparent 70%);
+    top: -200px; right: -100px;
+    animation: drift1 18s ease-in-out infinite alternate;
+  }
+  .ambient-2 {
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(91,168,160,0.06) 0%, transparent 70%);
+    bottom: 100px; left: -150px;
+    animation: drift2 22s ease-in-out infinite alternate;
+  }
+
+  @keyframes drift1 {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(-60px, 40px) scale(1.1); }
+  }
+  @keyframes drift2 {
+    from { transform: translate(0, 0) scale(1.1); }
+    to { transform: translate(40px, -30px) scale(1); }
+  }
+
+  /* ── LAYOUT ── */
+  .page {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 0 60px;
+  }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 3.5px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+
+  .hero-eyebrow::before {
+    content: '';
+    display: block;
+    width: 28px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .hero-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(52px, 10vw, 88px);
+    font-weight: 300;
+    line-height: 1.0;
+    color: var(--text);
+    margin-bottom: 12px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.4s forwards;
+  }
+
+  .hero-title em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .hero-title-line2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(52px, 10vw, 88px);
+    font-weight: 600;
+    line-height: 1.0;
+    color: var(--text);
+    margin-bottom: 36px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.55s forwards;
+  }
+
+  .hero-subtitle {
+    font-size: 16px;
+    font-weight: 300;
+    color: var(--text-mid);
+    max-width: 480px;
+    line-height: 1.8;
+    margin-bottom: 48px;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.7s forwards;
+  }
+
+  .hero-subtitle strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  .hero-cta-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.85s forwards;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gold);
+    color: #0e0e0f;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 16px 32px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: all 0.25s ease;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-primary:hover {
+    background: #dbbf7e;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(200,169,110,0.25);
+  }
+
+  .btn-primary svg {
+    transition: transform 0.2s ease;
+  }
+
+  .btn-primary:hover svg {
+    transform: translateX(3px);
+  }
+
+  .time-badge {
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .time-badge::before {
+    content: '◷';
+    color: var(--gold-dim);
+    font-size: 16px;
+  }
+
+  /* ── DIVIDER ── */
+  .section-divider {
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 72px 0;
+    opacity: 0;
+    animation: fadeIn 1s ease 1.2s forwards;
+  }
+
+  /* ── WHAT IS THIS ── */
+  .what-section {
+    opacity: 0;
+    animation: fadeUp 0.8s ease 1s forwards;
+  }
+
+  .section-tag {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 16px;
+  }
+
+  .what-section h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 400;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 24px;
+  }
+
+  .what-section h2 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .what-section p {
+    font-size: 15px;
+    color: var(--text-mid);
+    line-height: 1.85;
+    margin-bottom: 16px;
+    max-width: 580px;
+  }
+
+  .what-section p strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* ── EXERCISE PREVIEW ── */
+  .exercise-card {
+    margin: 40px 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 36px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .exercise-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold), var(--teal));
+  }
+
+  .exercise-card-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 20px;
+  }
+
+  .exercise-sentence {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(22px, 4vw, 30px);
+    font-style: italic;
+    color: var(--text);
+    margin-bottom: 24px;
+    line-height: 1.3;
+  }
+
+  .exercise-sentence span {
+    color: var(--gold);
+    border-bottom: 1px solid var(--gold-dim);
+    padding-bottom: 2px;
+  }
+
+  .example-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag {
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-mid);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 5px 14px;
+    transition: all 0.2s ease;
+  }
+
+  .tag:hover {
+    border-color: var(--gold-dim);
+    color: var(--gold);
+  }
+
+  /* ── STATS ROW ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 48px 0;
+  }
+
+  .stat-item {
+    background: var(--surface);
+    padding: 28px 24px;
+    text-align: center;
+    transition: background 0.2s ease;
+  }
+
+  .stat-item:hover { background: var(--surface2); }
+
+  .stat-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 42px;
+    font-weight: 600;
+    color: var(--gold);
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 400;
+    line-height: 1.4;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how-section {
+    margin: 80px 0;
+  }
+
+  .steps {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 20px;
+    padding: 28px 0;
+    border-bottom: 1px solid var(--border);
+    transition: all 0.2s ease;
+  }
+
+  .step:last-child { border-bottom: none; }
+
+  .step:hover .step-num {
+    color: var(--gold);
+    border-color: var(--gold-dim);
+  }
+
+  .step-num {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .step-content h3 {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .step-content p {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  /* ── PROMISE SECTION ── */
+  .promise-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 40px;
+    margin: 48px 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .promise-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 8px;
+    transition: background 0.2s;
+  }
+
+  .promise-item:hover { background: var(--surface2); }
+
+  .promise-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .promise-text {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.6;
+  }
+
+  .promise-text strong {
+    display: block;
+    color: var(--text);
+    font-weight: 500;
+    margin-bottom: 2px;
+    font-size: 14px;
+  }
+
+  /* ── AUTHOR ── */
+  .author-section {
+    margin: 80px 0 40px;
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+    padding: 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+
+  .author-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold-dim), var(--teal));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    color: var(--text);
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+
+  .author-info h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .author-info p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+
+  .author-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--teal);
+    text-decoration: none;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    transition: color 0.2s;
+  }
+
+  .author-link:hover { color: var(--gold); }
+
+  .author-link svg { opacity: 0.7; }
+
+  /* ── FINAL CTA ── */
+  .final-cta {
+    text-align: center;
+    padding: 80px 0 100px;
+    border-top: 1px solid var(--border);
+  }
+
+  .final-cta h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(32px, 6vw, 52px);
+    font-weight: 300;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 16px;
+  }
+
+  .final-cta h2 em {
+    font-style: italic;
+    color: var(--gold);
+  }
+
+  .final-cta p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 36px;
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 0.5px;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Scroll-triggered animations */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── MOBILE ── */
+  @media (max-width: 600px) {
+    .page { padding: 0 20px; }
+    .promise-card { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: 1fr; }
+    .author-section { flex-direction: column; }
+    .hero-cta-row { flex-direction: column; align-items: flex-start; }
+  }
+</style>
+</head>
+<body>
+
+<div class="ambient ambient-1"></div>
+<div class="ambient ambient-2"></div>
+
+<div class="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">A Finance Study · 2026</div>
+    <div class="hero-title">The <em>Happy</em></div>
+    <div class="hero-title-line2">When Project</div>
+    <p class="hero-subtitle">
+      A small, honest study about what actually makes people happy —
+      and whether <strong>money really has as much to do with it</strong> as we think.
+    </p>
+    <div class="hero-cta-row">
+      <a href="https://forms.gle/PTfrAaGvMoocmNbq5" target="_blank" class="btn-primary">
+        Take the Survey
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M5 12h14M12 5l7 7-7 7"/>
+        </svg>
+      </a>
+      <span class="time-badge">Under 5 minutes · Fully anonymous</span>
+    </div>
+  </section>
+
+  <div class="section-divider"></div>
+
+  <!-- WHAT IS THIS -->
+  <section class="what-section reveal">
+    <div class="section-tag">What is this?</div>
+    <h2>A question most of us <em>never actually ask</em> ourselves.</h2>
+    <p>
+      We spend a lot of our lives chasing milestones — a better salary, a bigger apartment,
+      a certain number in a bank account. But very few of us have ever stopped to ask:
+      <strong>what genuinely makes me happy, right now?</strong>
+    </p>
+    <p>
+      This project starts with one disarmingly simple exercise. And then asks whether the
+      things you listed actually need the money you think they do.
+    </p>
+
+    <div class="exercise-card">
+      <div class="exercise-card-label">The Core Exercise</div>
+      <div class="exercise-sentence">
+        "I feel happy when <span>_______________</span>"
+      </div>
+      <div class="example-tags">
+        <span class="tag">drinking coffee ☕</span>
+        <span class="tag">learning something new 📚</span>
+        <span class="tag">talking to a friend 💬</span>
+        <span class="tag">working out 🏋️</span>
+        <span class="tag">listening to music 🎵</span>
+        <span class="tag">making something creative 🎨</span>
+        <span class="tag">playing sports 🏸</span>
+        <span class="tag">watching a good movie 🎬</span>
+      </div>
+    </div>
+
+    <p>
+      Most people, when they actually write this list, discover something surprising.
+      The things that genuinely light them up? <strong>Most of them are already available to them.</strong>
+      Today. Without a raise.
+    </p>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-row reveal">
+    <div class="stat-item">
+      <div class="stat-number">5</div>
+      <div class="stat-label">minutes or less<br>to complete</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">3</div>
+      <div class="stat-label">finance questions<br>at the end</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-number">0</div>
+      <div class="stat-label">personal details<br>collected</div>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <section class="how-section reveal">
+    <div class="section-tag">How it works</div>
+    <h2 style="font-family:'Cormorant Garamond',serif; font-size:clamp(26px,4vw,36px); font-weight:400; color:var(--text); line-height:1.2; margin-bottom:8px;">
+      Three simple sections.<br><em>No right or wrong answers.</em>
+    </h2>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <h3>A little about you</h3>
+          <p>Just your age group and life stage. That's it. No name, no email, nothing identifying.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <h3>Your happiness list</h3>
+          <p>Complete "I feel happy when…" at least 10 times. Big things, small things, silly things — all welcome. Don't overthink it.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <h3>Three money questions</h3>
+          <p>Quick reflections on how money and happiness connect in your life. No calculations, no judgment — just your honest perspective.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROMISE -->
+  <div class="promise-card reveal">
+    <div class="promise-item">
+      <div class="promise-icon">🔒</div>
+      <div class="promise-text">
+        <strong>Fully Anonymous</strong>
+        No name, no email, no identifying information collected at any point.
+      </div>
+    </div>
+    <div class="promise-item">
+      <div class="promise-icon">📝</div>
+      <div class="promise-text">
+        <strong>Used for an Article</strong>
+        Responses will be analysed and written up as a personal research article.
+      </div>
+    </div>
+    <div class="promise-item">
+      <div class="promise-icon">🎯</div>
+      <div class="promise-text">
+        <strong>No Right Answers</strong>
+        This is about honest reflection, not performance. Whatever you write is correct.
+      </div>
+    </div>
+    <div class="promise-item">
+      <div class="promise-icon">⏱️</div>
+      <div class="promise-text">
+        <strong>Under 5 Minutes</strong>
+        Genuinely. Most people finish in 3–4 minutes once they start writing.
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTHOR -->
+  <div class="author-section reveal">
+    <div class="author-avatar">D</div>
+    <div class="author-info">
+      <h3>Dinesh Kumar</h3>
+      <p>
+        Someone who got curious about the gap between what people think will make them happy
+        and what actually does — and decided to ask the people around him directly.
+      </p>
+      <a href="https://www.linkedin.com/in/dinesh-kumar-4768a320b/" target="_blank" class="author-link">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6zM2 9h4v12H2z"/>
+          <circle cx="4" cy="4" r="2"/>
+        </svg>
+        View on LinkedIn
+      </a>
+    </div>
+  </div>
+
+  <!-- FINAL CTA -->
+  <section class="final-cta reveal">
+    <h2>Ready to write your<br><em>happy list?</em></h2>
+    <p>Takes less than 5 minutes. Your answers might surprise you.</p>
+    <a href="https://forms.gle/PTfrAaGvMoocmNbq5" target="_blank" class="btn-primary">
+      Start the Survey
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M5 12h14M12 5l7 7-7 7"/>
+      </svg>
+    </a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    The Happy When Project · 2026 · Dinesh Kumar
+  </footer>
+
+</div>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => {
+          entry.target.classList.add('visible');
+        }, i * 80);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
